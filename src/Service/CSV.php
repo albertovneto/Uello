@@ -14,55 +14,31 @@ class CSV
         $this->targetDirectory = $targetDirectory;
     }
 
-    public function upload(UploadedFile $file)
-    {
-        $fileName = md5(uniqid()).'.'.$file->guessExtension();
-
-        $file->move($this->getTargetDirectory(), $fileName);
-
-        return $fileName;
-    }
-
     public function read($archive)
     {
-        $rowNo = 1;
-        if (($fp = fopen($archive, "r")) !== FALSE) {
+        if (($fp = fopen($archive["tmp_name"], "r")) !== FALSE) {
             while (($row = fgetcsv($fp, 1000, ",")) !== FALSE) {
-                $num = count($row);
-                echo "<p> $num fields in line $rowNo: <br /></p>\n";
-                $rowNo++;
-                for ($c=0; $c < $num; $c++) {
-                    echo $row[$c] . "<br />\n";
-                }
+                $conteudo[] = $row;
             }
             fclose($fp);
+            return $conteudo;
         }
     }
 
-    public function write()
+    public function write($list,$file)
     {
-        $list = array (
-            array('aaa', 'bbb', 'ccc', 'dddd'),
-            array('123', '456', '789', '102'),
-            array('"aaa"', '"bbb"')
-        );
 
-        $fp = fopen("sample.csv", "w");
+        $fp = fopen($file, "w");
 
         foreach ($list as $line)
         {
             fputcsv(
-                $fp, // The file pointer
-                $line, // The fields
-                ',' // The delimiter
+                $fp,
+                $line,
+                ','
             );
         }
 
         fclose($fp);
-    }
-
-    public function getTargetDirectory()
-    {
-        return $this->targetDirectory;
     }
 }

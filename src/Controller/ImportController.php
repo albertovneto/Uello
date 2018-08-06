@@ -22,9 +22,13 @@ class ImportController extends Controller
      */
     public function index()
     {
+        $em = $this->getDoctrine()->getManager();
 
-        return $this->render("import/insert.html.twig", [
-            "msg" => "Olá Uello"
+        $imports = $em->getRepository(Import::class)->findAll();
+
+
+        return $this->render("import/index.html.twig", [
+            "imports" => $imports
         ]);
     }
 
@@ -34,21 +38,33 @@ class ImportController extends Controller
      *
      * @Route("import/insert")
      */
-    public function insert()
+    public function insert(Request $request)
     {
+        $post = $request->request->get();
         $em = $this->getDoctrine()->getManager();
 
         $import = new Import();
-        $url = "teste";
 
-        $import->setName("Primeira Importação de arquivos");
+        $import->setName($post["name"]);
 
         $em->persist();
         $em->flush();
-        $csv = new CSV();
 
-        $csv->read();
-        #$lastInsertId = $import->getId();
+        $lastInsertId = $import->getId();
+
+        if (!empty($lastInsertId)) {
+            $csv = new CSV();
+            $file = $request->files->get("file");
+            $rows = $csv->read($file);
+            foreach($rows as $row) {
+                $row["nome"];
+                $row["email"];
+                $row["datanasc"];
+                $row["cpf"];
+                $row["endereco"];
+                $row["cep"];
+            }
+        }
 
     }
 
@@ -62,7 +78,7 @@ class ImportController extends Controller
 
         $form = $this->createFormBuilder()
             ->add("name", TextType::class,["label"=>"Nome"])
-            ->add("archive", FileType::class,["label"=>"Arquivo"])
+            ->add("file", FileType::class,["label"=>"Arquivo"])
             ->add("Submit", SubmitType::class,["label"=>"Salvar"])
             ->getForm();
 

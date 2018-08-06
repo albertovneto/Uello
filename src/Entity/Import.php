@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ImportRepository")
@@ -61,5 +63,15 @@ class Import
     public function setUrl($url)
     {
         $this->url = $url;
+    }
+
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addPropertyConstraint('file', new Assert\File(array(
+            'mimeTypes' => array(
+                'application/csv',
+            ),
+            'mimeTypesMessage' => 'Por favor insira um arquivo CSV',
+        )));
     }
 }
